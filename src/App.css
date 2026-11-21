@@ -1,0 +1,107 @@
+@font-face {
+  font-family: "Author Variable";
+  src: url("/Author-VariableItalic.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+.app-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.canvas-share-page {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #e7e7e7;
+  color: #1f2937;
+}
+
+.canvas-share-header {
+  z-index: 20;
+  min-height: 52px;
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+}
+
+.canvas-share-header > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.canvas-share-header strong {
+  font-size: 14px;
+}
+
+.canvas-share-header span {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.canvas-share-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.canvas-share-workspace {
+  min-height: 0;
+  flex: 1;
+}
+
+.canvas-share-workspace > .ultrastory-host {
+  width: 100%;
+  height: 100%;
+}
+
+.canvas-share-page-status {
+  align-items: center;
+  justify-content: center;
+}
+
+.canvas-share-status-card {
+  max-width: 360px;
+  padding: 28px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  background: #fff;
+  text-align: center;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.08);
+}
+
+.canvas-share-status-card h1 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.canvas-share-status-card p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .canvas-share-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+    padding: 8px 12px;
+  }
+}

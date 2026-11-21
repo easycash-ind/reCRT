@@ -1,0 +1,152 @@
+@import "tailwindcss";
+@import "./styles/hub-glass-dark.css";
+
+@font-face {
+  font-family: "Author Variable";
+  src: url("/Author-VariableItalic.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Fusion Pixel";
+  src: url("./assets/fonts/fusion-pixel.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+/* 拟物登录台：本地嵌入 Fusion Pixel，字号取 12 的整数倍以保持点阵清晰 */
+.tactile-pixel-text {
+  font-family: "Fusion Pixel", monospace !important;
+  font-weight: 400 !important;
+  font-size: 12px !important;
+  line-height: 1;
+  font-smooth: never;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+  text-rendering: geometricPrecision;
+  letter-spacing: 0;
+}
+
+/* 登录方式选中态：略放大（仍基于 12px 栅格，用整数倍缩放更清晰） */
+.tactile-pixel-text-selected {
+  font-size: 12px !important;
+  transform: scale(1.2);
+  transform-origin: center center;
+}
+
+.tactile-pixel-icon {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  shape-rendering: crispEdges;
+}
+
+/*
+ * 登录方式选中态白底：
+ * - 无描边
+ * - 3×3 亮像素 + 1px 空隙的点阵铺满（不是一整块实心白）
+ * - 外轮廓仍用阶梯角裁切
+ */
+.tactile-pixel-tab-pill {
+  clip-path: polygon(
+    0 6px,
+    2px 6px,
+    2px 4px,
+    4px 4px,
+    4px 2px,
+    6px 2px,
+    6px 0,
+    calc(100% - 6px) 0,
+    calc(100% - 6px) 2px,
+    calc(100% - 4px) 2px,
+    calc(100% - 4px) 4px,
+    calc(100% - 2px) 4px,
+    calc(100% - 2px) 6px,
+    100% 6px,
+    100% calc(100% - 6px),
+    calc(100% - 2px) calc(100% - 6px),
+    calc(100% - 2px) calc(100% - 4px),
+    calc(100% - 4px) calc(100% - 4px),
+    calc(100% - 4px) calc(100% - 2px),
+    calc(100% - 6px) calc(100% - 2px),
+    calc(100% - 6px) 100%,
+    6px 100%,
+    6px calc(100% - 2px),
+    4px calc(100% - 2px),
+    4px calc(100% - 4px),
+    2px calc(100% - 4px),
+    2px calc(100% - 6px),
+    0 calc(100% - 6px)
+  );
+  /* 4×4 格：3×3 实心白像素 + 1px 空隙（80% 白） */
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23ffffff' fill-opacity='0.8'/%3E%3Crect width='3' height='3' fill='%23ffffff'/%3E%3C/svg%3E");
+  background-size: 4px 4px;
+  background-repeat: repeat;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border: none;
+  box-shadow: none;
+  outline: none;
+}
+
+/*
+ * 选中态外围辉光（纯白）：
+ * 强度由 --tab-pill-glow（0~2）驱动；用多层 box-shadow，避免 filter+clip 被父级裁掉
+ */
+.tactile-pixel-tab-glow {
+  --g: var(--tab-pill-glow, 0.9);
+  pointer-events: none;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, calc(0.16 * var(--g)));
+  box-shadow:
+    0 0 calc(6px * var(--g)) rgba(255, 255, 255, calc(0.9 * min(var(--g), 1))),
+    0 0 calc(14px * var(--g)) rgba(255, 255, 255, calc(0.55 * var(--g))),
+    0 0 calc(28px * var(--g)) rgba(255, 255, 255, calc(0.32 * var(--g))),
+    0 0 calc(42px * var(--g)) rgba(255, 255, 255, calc(0.16 * var(--g)));
+}
+
+@theme inline {
+  --color-brand: #2d34ff;
+  --color-brand-hover: #2563eb;
+
+  --color-surface: #ffffff;
+  --color-surface-well: #f3f4f6;
+  --color-on-surface: #111827;
+  --color-on-surface-secondary: #6b7280;
+  --color-on-surface-muted: #9ca3af;
+
+  --color-outline: #e5e7eb;
+  --color-outline-hover: #d1d5db;
+
+  --color-danger: #ef4444;
+
+  --radius-control: 0.75rem;
+  --radius-card: 1.25rem;
+  --radius-node-glass: 1.5rem;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+:root {
+  --theme-primary: #3b82f6;
+  --theme-primary-text: rgba(59, 130, 246, 0.8);
+  --theme-primary-bg: rgba(59, 130, 246, 0.08);
+  --theme-primary-focus: rgba(59, 130, 246, 0.2);
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+#root:has(.recrt-gallery) {
+  overflow: auto;
+}

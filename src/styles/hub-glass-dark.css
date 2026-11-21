@@ -1,0 +1,1018 @@
+/**
+ * 全站暗色 macOS Widgets & Glass 样式引擎（二期纯净无色相黑曜石 + 高饱和霓虹点缀）
+ *
+ * 设计语言对标：
+ * - 图 1（Sales Report 黑曜石高对比数据小组件）
+ * - 图 2（macOS Sonoma / Sequoia 原生暗色小组件）
+ * - Banana Canvas [data-node-ui="glass"] 玻璃节点原语
+ *
+ * 五层纯净无色相表面亮度架构（L0 -> L3，S = 0%）：
+ * - L0 全局桌面底板：#000000（纯正真黑底）+ 局部收敛的业务线宝蓝径向微光氛围
+ * - L1 工作区壳层容器（.hub-secondary-panel / .hub-content-panel / 画布舞台）：rgba(20, 20, 20, 0.96) (#141414) + blur(40px) + 11% 结构描边 + 10% 顶边镜面高光
+ * - L2 Widget 卡片与玻璃节点表面（.hub-card / [data-slot="card"] / .hub-data-table）：rgba(34, 34, 34, 0.90) (#222222) + 20px 圆角 + 9% 微描边 + 10% 顶边高光
+ * - L2-Sub 内嵌凹槽（.hub-widget-well / 代码块 / 表头 / 配方子卡）：rgba(0, 0, 0, 0.42) (#0C0C0C) + 6% 白微边框
+ * - L3 浮层菜单与交互胶囊：
+ *   · 浮层菜单（Dropdown / Context Menu / Submenu Portal）：rgba(38, 38, 38, 0.84) + blur(40px) + 12% 镜面边框
+ *   · 次级/过滤胶囊：rgba(255, 255, 255, 0.14) + 90% 白字（悬停 22% 白底 + 纯白字）
+ *   · 主按钮/选中胶囊：rgba(255, 255, 255, 0.92) + 90% 深黑字（高对比反转胶囊）
+ */
+
+html[data-hub-theme='dark'] {
+  color-scheme: dark;
+
+  /* macOS Widgets & Banana Glass 核心变量（纯净无色相 Neutral Dark: R=G=B, S=0%） */
+  --glass-dark-surface: #121212;
+  --glass-dark-elevated: rgba(34, 34, 34, 0.90);
+  --glass-dark-floating: rgba(38, 38, 38, 0.84);
+  --glass-dark-field: rgba(0, 0, 0, 0.40);
+  --node-ui-glass-surface: hsl(0 0% 18% / 0.78);
+  --node-ui-glass-elevated: var(--glass-dark-elevated);
+  --node-ui-glass-field: rgba(0, 0, 0, 0.36);
+  --glass-field-fill: var(--node-ui-glass-field);
+
+  /* Hub 语义色全量重映射（零色相中性黑灰） */
+  --color-surface: rgba(34, 34, 34, 0.90);
+  --color-surface-secondary: rgba(0, 0, 0, 0.40);
+  --color-surface-hover: rgba(255, 255, 255, 0.12);
+  --color-surface-well: rgba(0, 0, 0, 0.42);
+
+  /* 四阶 Alpha 墨水系统（Dark Mode: White + Opacity） */
+  --color-on-surface: rgba(255, 255, 255, 0.94);
+  --color-on-surface-secondary: rgba(255, 255, 255, 0.64);
+  --color-on-surface-muted: rgba(255, 255, 255, 0.42);
+  --color-on-surface-subtle: rgba(255, 255, 255, 0.24);
+
+  --color-outline: rgba(255, 255, 255, 0.09);
+  --color-outline-hover: rgba(255, 255, 255, 0.18);
+
+  /* 高级冷色域主调（蓝 Sapphire - 靛紫 Indigo/Violet - 翠绿 Emerald）+ 辅助香槟暖金/克制珊瑚红 */
+  --color-danger: #F87171;
+  --color-danger-light: rgba(248, 113, 113, 0.14);
+  --color-success: #34D399;
+  --color-success-light: rgba(52, 211, 153, 0.14);
+  --color-warning: #FBBF24;
+  --color-warning-light: rgba(251, 191, 36, 0.14);
+  --color-brand-light: rgba(77, 159, 255, 0.15);
+
+  --widget-metric-positive: #34D399;
+  --widget-metric-positive-bg: rgba(52, 211, 153, 0.14);
+  --widget-metric-negative: #F87171;
+  --widget-metric-negative-bg: rgba(248, 113, 113, 0.14);
+  --widget-metric-warning: #FBBF24;
+  --widget-metric-warning-bg: rgba(251, 191, 36, 0.14);
+
+  /* 冷色域同频 4 色（Blue / Cyan / Purple / Green）+ 克制语义 2 色（Amber / Rose） */
+  --widget-cyan: #38BDF8;
+  --widget-cyan-bg: rgba(56, 189, 248, 0.13);
+  --widget-cyan-ring: rgba(56, 189, 248, 0.26);
+  --widget-blue: #4D9FFF;
+  --widget-blue-bg: rgba(77, 159, 255, 0.14);
+  --widget-blue-ring: rgba(77, 159, 255, 0.28);
+  --widget-green: #34D399;
+  --widget-green-bg: rgba(52, 211, 153, 0.13);
+  --widget-green-ring: rgba(52, 211, 153, 0.26);
+  --widget-amber: #FBBF24;
+  --widget-amber-bg: rgba(251, 191, 36, 0.13);
+  --widget-amber-ring: rgba(251, 191, 36, 0.26);
+  --widget-purple: #A78BFA;
+  --widget-purple-bg: rgba(167, 139, 250, 0.14);
+  --widget-purple-ring: rgba(167, 139, 250, 0.28);
+  --widget-rose: #F87171;
+  --widget-rose-bg: rgba(248, 113, 113, 0.13);
+  --widget-rose-ring: rgba(248, 113, 113, 0.26);
+
+  /* 圆角与阴影对齐 macOS Widget */
+  --radius-card: 1.25rem;
+  --radius-panel: 1.5rem;
+  --shadow-card: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 10px 28px rgba(0, 0, 0, 0.45);
+  --shadow-card-hover: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 14px 36px rgba(0, 0, 0, 0.58);
+
+  /* shadcn / SEO HSL 三元组暗色 Widget 映射（S = 0% 纯净无色相） */
+  --background: 0 0% 8%;
+  --foreground: 0 0% 95%;
+  --card: 0 0% 13.5%;
+  --card-foreground: 0 0% 95%;
+  --popover: 0 0% 15%;
+  --popover-foreground: 0 0% 95%;
+  --primary: 0 0% 93%;
+  --primary-foreground: 0 0% 6%;
+  --secondary: 0 0% 18%;
+  --secondary-foreground: 0 0% 92%;
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 64%;
+  --accent: 0 0% 20%;
+  --accent-foreground: 0 0% 96%;
+  --border: 0 0% 100% / 0.09;
+  --input: 0 0% 100% / 0.10;
+  --ring: 0 0% 100% / 0.34;
+}
+
+/* SEO 作用域同步切换为纯净无色相暗色 Widget 基底 */
+html[data-hub-theme='dark'] [data-feature='seo'] {
+  --background: 0 0% 8%;
+  --foreground: 0 0% 95%;
+  --card: 0 0% 13.5%;
+  --card-foreground: 0 0% 95%;
+  --popover: 0 0% 15%;
+  --popover-foreground: 0 0% 95%;
+  --primary: 0 0% 93%;
+  --primary-foreground: 0 0% 6%;
+  --secondary: 0 0% 18%;
+  --secondary-foreground: 0 0% 92%;
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 64%;
+  --accent: 0 0% 20%;
+  --accent-foreground: 0 0% 96%;
+  --border: 0 0% 100% / 0.09;
+  --input: 0 0% 100% / 0.10;
+  --ring: 0 0% 100% / 0.34;
+  color: var(--color-on-surface);
+}
+
+html[data-hub-theme='dark'] [data-feature='seo'] .prose {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+html[data-hub-theme='dark'] [data-feature='seo'] .prose code {
+  background: rgba(0, 0, 0, 0.42);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+html[data-hub-theme='dark'] [data-feature='seo'] .prose blockquote {
+  border-left-color: rgba(255, 255, 255, 0.24);
+  color: rgba(255, 255, 255, 0.64);
+}
+
+html[data-hub-theme='dark'] [data-feature='seo'] .prose th,
+html[data-hub-theme='dark'] [data-feature='seo'] .prose td {
+  border-color: rgba(255, 255, 255, 0.10);
+}
+
+html[data-hub-theme='dark'] [data-feature='seo'] .prose th {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ============================================================================
+ * L0 全局纯正真黑底板（#000000 + 收敛宝蓝径向微光）与 L1 工作区壳层容器（#141414）
+ * ========================================================================== */
+
+html[data-hub-theme='dark'],
+html[data-hub-theme='dark'] body,
+html[data-hub-theme='dark'] #root {
+  background: #000000 !important;
+  color: var(--color-on-surface);
+}
+
+html[data-hub-theme='dark'] .hub-shell-root {
+  background: #000000 !important;
+  color: var(--color-on-surface);
+}
+
+html[data-hub-theme='dark'] .hub-nav-active-glow {
+  opacity: 0.78;
+  filter: blur(28px);
+}
+
+html[data-hub-theme='dark'] .hub-secondary-panel,
+html[data-hub-theme='dark'] .hub-content-panel {
+  border: 1px solid rgba(255, 255, 255, 0.11) !important;
+  border-radius: var(--radius-node-glass, 1.5rem) !important;
+  background: var(--glass-dark-surface, #121212) !important;
+  backdrop-filter: blur(40px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(160%) !important;
+  box-shadow: none !important;
+  color: var(--color-on-surface);
+}
+
+html[data-hub-theme='dark'] .hub-page-topbar {
+  border-bottom: none !important;
+  background: rgba(18, 18, 18, 0.86) !important;
+  backdrop-filter: blur(32px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(160%) !important;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.07);
+}
+
+/* ============================================================================
+ * L2 Widget 卡片表面与 L2-Sub 内嵌凹槽（对标图 1 Sales Report & 图 2 macOS Widgets）
+ * ========================================================================== */
+
+html[data-hub-theme='dark'] .hub-card,
+html[data-hub-theme='dark'] [data-slot='card'],
+html[data-hub-theme='dark'] .hub-data-table {
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  border-radius: var(--radius-card, 1.25rem) !important;
+  background: var(--glass-dark-elevated, rgba(34, 34, 34, 0.90)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    0 10px 28px rgba(0, 0, 0, 0.45) !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-color: transparent !important;
+  color: var(--color-on-surface);
+}
+
+html[data-hub-theme='dark'] .hub-card--soft,
+html[data-hub-theme='dark'] .hub-widget-well {
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 0.875rem !important;
+  background: rgba(0, 0, 0, 0.42) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+}
+
+html[data-hub-theme='dark'] .hub-widget-well:hover {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  background: rgba(0, 0, 0, 0.50) !important;
+}
+
+html[data-hub-theme='dark'] .hub-card-media {
+  background: rgba(0, 0, 0, 0.44) !important;
+}
+
+/* 下拉面板与浮层菜单（Dropdown / Select / Popover / Canvas Context Menu & Submenu 全链路统一：移除顶部立体描边，保持干净简练） */
+html[data-hub-theme='dark'] .hub-dropdown-panel,
+html[data-hub-theme='dark'] .hub-dropdown-submenu-panel--portal.hub-dropdown-panel,
+html[data-hub-theme='dark'] .canvas-context-menu-submenu,
+html[data-hub-theme='dark'] .video-edit-caption-menu,
+html[data-hub-theme='dark'] [data-slot='select-content'],
+html[data-hub-theme='dark'] [data-slot='popover-content'],
+html[data-hub-theme='dark'] [data-slot='dropdown-menu-content'] {
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 1rem !important;
+  background: var(--glass-dark-floating, rgba(38, 38, 38, 0.84)) !important;
+  backdrop-filter: blur(40px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(180%) !important;
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.58) !important;
+  color: var(--color-on-surface) !important;
+  padding: 5px !important;
+}
+
+html[data-hub-theme='dark'] .canvas-context-menu {
+  padding: 5px !important;
+  border-radius: 1rem !important;
+}
+
+html[data-hub-theme='dark'] .canvas-context-menu::before {
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: inherit !important;
+  background: var(--glass-dark-floating, rgba(38, 38, 38, 0.84)) !important;
+  backdrop-filter: blur(40px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(180%) !important;
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.58) !important;
+}
+
+html[data-hub-theme='dark'] .hub-dropdown-item,
+html[data-hub-theme='dark'] .hub-dropdown-submenu-trigger,
+html[data-hub-theme='dark'] .canvas-context-menu-item,
+html[data-hub-theme='dark'] [data-slot='select-item'],
+html[data-hub-theme='dark'] [data-slot='dropdown-menu-item'] {
+  border-radius: 0.5rem !important;
+  color: rgba(255, 255, 255, 0.86) !important;
+}
+
+html[data-hub-theme='dark'] .hub-dropdown-item:hover:not(:disabled),
+html[data-hub-theme='dark'] .hub-dropdown-submenu-row:hover > .hub-dropdown-submenu-trigger,
+html[data-hub-theme='dark'] .hub-dropdown-submenu-row.is-open > .hub-dropdown-submenu-trigger,
+html[data-hub-theme='dark'] .canvas-context-menu-item:hover:not(:disabled),
+html[data-hub-theme='dark'] [data-slot='select-item']:hover,
+html[data-hub-theme='dark'] [data-slot='select-item'][data-highlighted],
+html[data-hub-theme='dark'] [data-slot='dropdown-menu-item']:hover,
+html[data-hub-theme='dark'] [data-slot='dropdown-menu-item'][data-highlighted] {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+}
+
+html[data-hub-theme='dark'] .hub-dropdown-item.is-selected,
+html[data-hub-theme='dark'] .hub-dropdown-item[aria-selected='true'],
+html[data-hub-theme='dark'] [data-slot='select-item'][data-state='checked'] {
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: rgba(0, 0, 0, 0.90) !important;
+  font-weight: 600;
+}
+
+/* 模态弹窗与抽屉（Modal / Dialog / Sheet） */
+html[data-hub-theme='dark'] .hub-modal-panel,
+html[data-hub-theme='dark'] [data-slot='dialog-content'],
+html[data-hub-theme='dark'] [data-slot='sheet-content'] {
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: var(--radius-node-glass, 1.5rem) !important;
+  background: rgba(30, 30, 30, 0.94) !important;
+  backdrop-filter: blur(40px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(180%) !important;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  color: var(--color-on-surface) !important;
+}
+
+html[data-hub-theme='dark'] .hub-modal-close {
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.84);
+}
+
+html[data-hub-theme='dark'] .hub-modal-close:hover {
+  background: rgba(255, 255, 255, 0.24);
+  color: #ffffff;
+}
+
+/* ============================================================================
+ * L3 控件配方：Button / IconButton / FilterPill / Input / Switch / Slider / Badge
+ * ========================================================================== */
+
+/* 1. 按钮与筛选胶囊（Button / FilterPill / IconButton） */
+html[data-hub-theme='dark'] :is(.hub-btn, .hub-filter-pill, .hub-icon-btn):not(.canvas-node *) {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Ghost 按钮与导航项（常态透明无底色，悬停浅透底，点击瞬间或显式 pressed 激活为白底） */
+html[data-hub-theme='dark'] .hub-btn--ghost:not(.is-pressed):not([aria-pressed='true']) {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+html[data-hub-theme='dark'] .hub-btn--ghost:not(.is-pressed):not([aria-pressed='true']):hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.10);
+  color: rgba(255, 255, 255, 0.96);
+}
+
+/* Default / Soft / Outline / Glass / FilterPill：常态统一为 13% 白浅色底，悬停 22% 白 */
+html[data-hub-theme='dark'] :is(
+  .hub-btn--default,
+  .hub-btn--soft,
+  .hub-btn--outline,
+  .hub-btn--glass,
+  .hub-filter-pill
+):not(.is-pressed):not([aria-pressed='true']):not([aria-expanded='true']):not(.canvas-node *) {
+  background: rgba(255, 255, 255, 0.13) !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+html[data-hub-theme='dark'] :is(
+  .hub-btn--default,
+  .hub-btn--soft,
+  .hub-btn--outline,
+  .hub-btn--glass,
+  .hub-filter-pill
+):hover:not(:disabled):not(.is-pressed):not([aria-pressed='true']):not([aria-expanded='true']):not(.canvas-node *) {
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+}
+
+/* 激活态（Button Click 按下瞬间 :active，或显式选中态 is-pressed / aria-pressed="true" / aria-expanded="true"）：高对比 90% 白底 + 88% 黑字 */
+html[data-hub-theme='dark'] :is(
+  .hub-btn:not(.hub-btn--destructive):not(.hub-btn--link):active:not(:disabled),
+  .hub-btn.is-pressed,
+  .hub-btn[aria-pressed='true'],
+  .hub-filter-pill.is-active,
+  .hub-filter-pill[aria-expanded='true'],
+  .is-open > .hub-filter-pill
+):not(.canvas-node *) {
+  background: rgba(255, 255, 255, 0.90) !important;
+  color: rgba(0, 0, 0, 0.88) !important;
+  font-weight: 600;
+}
+
+html[data-hub-theme='dark'] :is(
+  .hub-btn.is-pressed,
+  .hub-btn[aria-pressed='true']
+):hover:not(:disabled):not(.canvas-node *) {
+  background: #ffffff !important;
+  color: rgba(0, 0, 0, 0.92) !important;
+}
+
+/* IconButton 暗色 Widget 适配 */
+html[data-hub-theme='dark'] .hub-icon-btn:not(.is-active):not([aria-pressed='true']):not(.canvas-node *) {
+  color: rgba(255, 255, 255, 0.74);
+}
+
+html[data-hub-theme='dark'] :is(
+  .hub-icon-btn--soft,
+  .hub-icon-btn--outline,
+  .hub-icon-btn--surface
+):not(.is-active):not([aria-pressed='true']):not(.canvas-node *) {
+  background: rgba(255, 255, 255, 0.13) !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+html[data-hub-theme='dark'] .hub-icon-btn:hover:not(:disabled):not(.is-active):not([aria-pressed='true']):not(.canvas-node *) {
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+}
+
+html[data-hub-theme='dark'] :is(.hub-icon-btn.is-active, .hub-icon-btn[aria-pressed='true']):not(.canvas-node *) {
+  background: rgba(255, 255, 255, 0.90) !important;
+  color: rgba(0, 0, 0, 0.88) !important;
+}
+
+html[data-hub-theme='dark'] .hub-filter-chevron {
+  color: rgba(255, 255, 255, 0.68) !important;
+}
+
+html[data-hub-theme='dark'] :is(.hub-filter-pill.is-active, .hub-filter-pill[aria-expanded='true'], .is-open > .hub-filter-pill)
+  .hub-filter-chevron {
+  color: rgba(0, 0, 0, 0.78) !important;
+}
+
+/* 2. 输入框与多行文本域（Input / Textarea / SidebarSearchInput / shadcn Input） */
+html[data-hub-theme='dark'] :is(
+  .hub-input,
+  .hub-input--area,
+  [data-slot='input'],
+  [data-slot='textarea'],
+  [data-slot='select-trigger']
+):not(.canvas-node *) {
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(0, 0, 0, 0.30) !important;
+  color: var(--color-on-surface) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+html[data-hub-theme='dark'] :is(
+  .hub-input,
+  .hub-input--area,
+  [data-slot='input'],
+  [data-slot='textarea']
+)::placeholder {
+  color: var(--color-on-surface-muted) !important;
+}
+
+html[data-hub-theme='dark'] :is(
+  .hub-input,
+  .hub-input--area,
+  [data-slot='input'],
+  [data-slot='textarea'],
+  [data-slot='select-trigger']
+):hover:not(:disabled):not(.canvas-node *) {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  background: rgba(0, 0, 0, 0.36) !important;
+}
+
+html[data-hub-theme='dark'] :is(
+  .hub-input,
+  .hub-input--area,
+  [data-slot='input'],
+  [data-slot='textarea'],
+  [data-slot='select-trigger']
+):focus:not(.canvas-node *),
+html[data-hub-theme='dark'] :is(
+  .hub-input,
+  .hub-input--area,
+  [data-slot='input'],
+  [data-slot='textarea'],
+  [data-slot='select-trigger']
+):focus-visible:not(.canvas-node *) {
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  background: rgba(0, 0, 0, 0.40) !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.10) !important;
+}
+
+/* 3. 分段开关（Switch）对齐 macOS 小组件胶囊切换器 */
+html[data-hub-theme='dark'] .hub-switch {
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  background: rgba(0, 0, 0, 0.32) !important;
+}
+
+html[data-hub-theme='dark'] .hub-switch-thumb {
+  background: rgba(255, 255, 255, 0.90) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+}
+
+html[data-hub-theme='dark'] .hub-switch-segment {
+  color: rgba(255, 255, 255, 0.68) !important;
+}
+
+html[data-hub-theme='dark'] .hub-switch-segment.is-active {
+  color: rgba(0, 0, 0, 0.88) !important;
+  font-weight: 600;
+}
+
+/* 4. 滑杆（Slider / filter-range） */
+html[data-hub-theme='dark'] .hub-slider {
+  --slider-track: rgba(255, 255, 255, 0.16);
+  --slider-fill: rgba(255, 255, 255, 0.90);
+}
+
+html[data-hub-theme='dark'] .filter-range::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.90) 0%,
+    rgba(255, 255, 255, 0.90) var(--range-progress, 50%),
+    rgba(255, 255, 255, 0.18) var(--range-progress, 50%),
+    rgba(255, 255, 255, 0.18) 100%
+  );
+}
+
+html[data-hub-theme='dark'] .filter-range::-webkit-slider-thumb {
+  background: #ffffff;
+}
+
+/* 5. 徽章（Badge）暗色 Widget 发光半透胶囊适配（对标图 2 胶囊标签） */
+html[data-hub-theme='dark'] .hub-badge--soft {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: rgba(255, 255, 255, 0.86) !important;
+}
+
+html[data-hub-theme='dark'] .hub-badge--dark {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.24) !important;
+  color: #ffffff !important;
+}
+
+/* 6. shadcn Tabs / Table 适配 */
+html[data-hub-theme='dark'] [data-slot='tabs-list'] {
+  background: rgba(0, 0, 0, 0.30) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.68) !important;
+}
+
+html[data-hub-theme='dark'] [data-slot='tabs-trigger'][data-state='active'] {
+  background: rgba(255, 255, 255, 0.90) !important;
+  color: rgba(0, 0, 0, 0.88) !important;
+  font-weight: 600;
+}
+
+html[data-hub-theme='dark'] [data-slot='table-row']:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ============================================================================
+ * 画布工作台底板联动（Canvas Dark Backdrop & Edges & Veil - 纯净无色相 #141414）
+ * ========================================================================== */
+
+html[data-hub-theme='dark'] .ultrastory-host,
+html[data-hub-theme='dark'] .app-shell,
+html[data-hub-theme='dark'] .app-canvas-main,
+html[data-hub-theme='dark'] .canvas-layout,
+html[data-hub-theme='dark'] .canvas-stage-wrap,
+html[data-hub-theme='dark'] .canvas-stage,
+html[data-hub-theme='dark'] .canvas-layout .react-flow,
+html[data-hub-theme='dark'] .react-flow,
+html[data-hub-theme='dark'] .react-flow__background,
+html[data-hub-theme='dark'] .canvas-area,
+html[data-hub-theme='dark'] .canvas-flow {
+  background: var(--glass-dark-surface, #121212) !important;
+  background-color: var(--glass-dark-surface, #121212) !important;
+}
+
+html[data-hub-theme='dark'] .canvas-load-veil {
+  background: var(--glass-dark-surface, #121212) !important;
+}
+
+html[data-hub-theme='dark'] .canvas-load-label,
+html[data-hub-theme='dark'] .ultrastory-host-loading {
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+html[data-hub-theme='dark'] .canvas-load-percent {
+  color: rgba(255, 255, 255, 0.52) !important;
+}
+
+html[data-hub-theme='dark'] .canvas-load-spinner {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  border-top-color: rgba(255, 255, 255, 0.82) !important;
+}
+
+html[data-hub-theme='dark'] .canvas-load-progress {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+html[data-hub-theme='dark'] .canvas-load-progress-bar {
+  background: rgba(255, 255, 255, 0.82) !important;
+}
+
+html[data-hub-theme='dark'] .react-flow__background pattern circle,
+html[data-hub-theme='dark'] .react-flow__background-pattern.dots {
+  fill: rgba(255, 255, 255, 0.10) !important;
+}
+
+html[data-hub-theme='dark'] .react-flow__edge-path,
+html[data-hub-theme='dark'] .react-flow__connection-path {
+  stroke: rgba(255, 255, 255, 0.45) !important;
+}
+
+html[data-hub-theme='dark'] .react-flow__edge.edge-hidden-preview .react-flow__edge-path {
+  stroke: rgba(255, 255, 255, 0.16) !important;
+}
+
+html[data-hub-theme='dark'] .react-flow__handle::after {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: #141414 !important;
+}
+
+html[data-hub-theme='dark'] .ultrastory-canvas-nav-title {
+  color: rgba(255, 255, 255, 0.90) !important;
+}
+
+html[data-hub-theme='dark'] .canvas-list li.active .canvas-item-btn,
+html[data-hub-theme='dark'] .canvas-item-btn[data-theme-selected='true'] {
+  background: rgba(255, 255, 255, 0.90) !important;
+  color: rgba(0, 0, 0, 0.88) !important;
+}
+
+/* ============================================================================
+ * 业务模块存量硬编码工具类兼容层（消除暗色模式下的刺眼白块、黑底黑按钮与深灰字）
+ * ========================================================================== */
+
+/* 1. 存量硬编码深色按钮（bg-gray-900 / bg-zinc-900 / bg-slate-800 / bg-black）
+ *    常态统一为浅色半透明底色（13% 白），仅在点击按下瞬间（:active）或显式 aria-pressed="true" 时反转为全白激活态 */
+html[data-hub-theme='dark'] :is(
+  .hub-secondary-panel,
+  .hub-content-panel,
+  .hub-modal-panel,
+  #portal,
+  #hub-zoom-portal,
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content']
+) :is(button, a, [role='button'], [role='tab']):is(
+  .bg-gray-900,
+  .bg-zinc-900,
+  .bg-slate-900,
+  .bg-neutral-900,
+  .bg-gray-800,
+  .bg-slate-800,
+  .bg-zinc-800,
+  .bg-gray-700,
+  .bg-black,
+  .bg-black\/80
+):not(.hub-btn):not([aria-pressed='true']):not([aria-selected='true']):not(.canvas-node *) {
+  background-color: rgba(255, 255, 255, 0.13) !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+  border-color: transparent !important;
+}
+
+html[data-hub-theme='dark'] :is(
+  .hub-secondary-panel,
+  .hub-content-panel,
+  .hub-modal-panel,
+  #portal,
+  #hub-zoom-portal,
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content']
+) :is(button, a, [role='button'], [role='tab']):is(
+  .bg-gray-900,
+  .bg-zinc-900,
+  .bg-slate-900,
+  .bg-neutral-900,
+  .bg-gray-800,
+  .bg-slate-800,
+  .bg-zinc-800,
+  .bg-gray-700,
+  .bg-black,
+  .bg-black\/80
+):hover:not(:disabled):not(.hub-btn):not([aria-pressed='true']):not([aria-selected='true']):not(.canvas-node *) {
+  background-color: rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+}
+
+html[data-hub-theme='dark'] :is(
+  .hub-secondary-panel,
+  .hub-content-panel,
+  .hub-modal-panel,
+  #portal,
+  #hub-zoom-portal,
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content']
+) :is(button, a, [role='button'], [role='tab']):is(
+  .bg-gray-900,
+  .bg-zinc-900,
+  .bg-slate-900,
+  .bg-neutral-900,
+  .bg-gray-800,
+  .bg-slate-800,
+  .bg-zinc-800,
+  .bg-gray-700,
+  .bg-black,
+  .bg-black\/80
+):is(:active:not(:disabled), [aria-pressed='true'], [aria-selected='true']):not(.hub-btn):not(.canvas-node *) {
+  background-color: rgba(255, 255, 255, 0.90) !important;
+  color: rgba(0, 0, 0, 0.88) !important;
+  border-color: transparent !important;
+  font-weight: 600;
+}
+
+/* 2. 存量非卡片类的硬编码白底容器 -> Widget L2 曜石卡片表面（注意排除 .hub-card 与反转按钮） */
+html[data-hub-theme='dark'] :is(
+  .hub-secondary-panel,
+  .hub-content-panel,
+  .hub-modal-panel,
+  #portal,
+  #hub-zoom-portal,
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content']
+) :is(
+  .bg-white,
+  .bg-white\/95,
+  .bg-white\/90,
+  .bg-white\/85,
+  .bg-white\/80,
+  .bg-white\/70
+):not(.hub-card):not([data-slot='card']):not(.hub-btn):not(.hub-switch-thumb):not(button):not([role='button']):not([role='tab']):not(.canvas-node *) {
+  background-color: var(--glass-dark-elevated, rgba(28, 30, 38, 0.92)) !important;
+}
+
+/* 存量白底小按钮（如 bg-white border-gray-200 次级按钮）-> 半透明胶囊按钮 */
+html[data-hub-theme='dark'] :is(
+  .hub-secondary-panel,
+  .hub-content-panel,
+  .hub-modal-panel,
+  #portal,
+  #hub-zoom-portal,
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content']
+) :is(button, a, [role='button']):is(
+  .bg-white,
+  .bg-white\/90,
+  .bg-white\/80
+):not(.hub-btn):not(.dark\:bg-white):not(.canvas-node *) {
+  background-color: rgba(255, 255, 255, 0.13) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+html[data-hub-theme='dark'] :is(
+  .hub-secondary-panel,
+  .hub-content-panel,
+  .hub-modal-panel,
+  #portal,
+  #hub-zoom-portal,
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content']
+) :is(button, a, [role='button']):is(
+  .bg-white,
+  .bg-white\/90,
+  .bg-white\/80
+):hover:not(:disabled):not(.hub-btn):not(.dark\:bg-white):not(.canvas-node *) {
+  background-color: rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+}
+
+/* 3. 存量浅灰背景块（bg-gray-50 / bg-slate-50 / bg-gray-100 等）-> L2-Sub 内凹深色槽 */
+html[data-hub-theme='dark'] :is(
+  .hub-secondary-panel,
+  .hub-content-panel,
+  .hub-modal-panel,
+  #portal,
+  #hub-zoom-portal,
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content']
+) :is(
+  .bg-gray-50,
+  .bg-gray-50\/80,
+  .bg-gray-50\/60,
+  .bg-gray-50\/50,
+  .bg-gray-50\/40,
+  .bg-slate-50,
+  .bg-slate-50\/80,
+  .bg-slate-50\/50,
+  .bg-zinc-50,
+  .bg-neutral-50,
+  .bg-gray-100,
+  .bg-slate-100,
+  .bg-zinc-100,
+  .bg-gray-200\/60,
+  .bg-gray-200,
+  .bg-\[\#fafafa\],
+  .bg-\[\#f7f7f7\],
+  .bg-\[\#f5f5f5\],
+  .bg-\[\#f4f4f5\],
+  .bg-\[\#f5f7fa\],
+  .bg-\[\#f5f7fa\]\/50,
+  .bg-\[\#f1f5f8\],
+  .bg-\[\#eef3f6\],
+  .bg-\[\#F4F5F9\],
+  .bg-\[\#F8F9FC\],
+  .bg-\[\#F1F2F7\],
+  .bg-\[\#FAFBFD\],
+  .bg-\[\#f7f8fa\],
+  .bg-\[\#F7F7FB\]
+):not(.hub-btn):not(button):not(.canvas-node *) {
+  background-color: rgba(0, 0, 0, 0.28) !important;
+}
+
+html[data-hub-theme='dark'] :is(
+  .hub-secondary-panel,
+  .hub-content-panel,
+  .hub-modal-panel,
+  #portal,
+  #hub-zoom-portal,
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content']
+) :is(button, [role='button']):is(
+  .bg-gray-50,
+  .bg-gray-100,
+  .bg-slate-100,
+  .bg-zinc-100,
+  .bg-gray-200,
+  .bg-\[\#fafafa\],
+  .bg-\[\#f5f5f5\],
+  .bg-\[\#F1F2F7\],
+  .bg-\[\#FAFBFD\],
+  .bg-\[\#eef3f6\]
+):not(.hub-btn):not(.canvas-node *) {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+html[data-hub-theme='dark'] :is(
+  .hub-secondary-panel,
+  .hub-content-panel,
+  .hub-modal-panel,
+  #portal,
+  #hub-zoom-portal,
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content']
+) :is(button, [role='button']):is(
+  .hover\:bg-gray-50,
+  .hover\:bg-gray-100,
+  .hover\:bg-slate-50,
+  .hover\:bg-slate-100,
+  .hover\:bg-zinc-50,
+  .hover\:bg-zinc-100
+):hover:not(:disabled):not(.hub-btn):not(.canvas-node *) {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+html[data-hub-theme='dark'] :is(
+  .hub-secondary-panel,
+  .hub-content-panel,
+  .hub-modal-panel,
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content']
+) :is(
+  .bg-black\/5,
+  .bg-black\/\[0\.04\],
+  .bg-black\/\[0\.03\],
+  .bg-black\/\[0\.02\]
+):not(.hub-btn):not(.hub-card--soft):not(.canvas-node *) {
+  background-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+/* 4. 存量硬编码深色文字 -> 四阶 Alpha 墨水系统（严格排除高对比白底按钮，防止白底白字） */
+html[data-hub-theme='dark'] :is(
+  .hub-secondary-panel,
+  .hub-content-panel,
+  .hub-modal-panel,
+  .hub-dropdown-panel,
+  #portal,
+  #hub-zoom-portal,
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content']
+) :is(
+  .text-gray-950,
+  .text-gray-900,
+  .text-gray-800,
+  .text-slate-950,
+  .text-slate-900,
+  .text-slate-800,
+  .text-zinc-950,
+  .text-zinc-900,
+  .text-zinc-800,
+  .text-neutral-900,
+  .text-neutral-800,
+  .text-black,
+  .text-\[\#15334d\],
+  .text-\[\#1A1D26\]
+):not(.hub-btn):not(.dark\:bg-white):not(.bg-gray-900):not(.bg-zinc-900):not(.bg-slate-900):not(.bg-black):not(.hub-dropdown-item.is-selected *):not(.canvas-node *) {
+  color: var(--color-on-surface, rgba(255, 255, 255, 0.94)) !important;
+}
+
+html[data-hub-theme='dark'] :is(
+  .hub-secondary-panel,
+  .hub-content-panel,
+  .hub-modal-panel,
+  .hub-dropdown-panel,
+  #portal,
+  #hub-zoom-portal,
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content']
+) :is(
+  .text-gray-700,
+  .text-gray-600,
+  .text-gray-500,
+  .text-slate-700,
+  .text-slate-600,
+  .text-slate-500,
+  .text-zinc-700,
+  .text-zinc-600,
+  .text-zinc-500,
+  .text-neutral-600,
+  .text-neutral-500,
+  .text-\[\#597287\]
+):not(.hub-btn):not(.canvas-node *) {
+  color: var(--color-on-surface-secondary, rgba(255, 255, 255, 0.62)) !important;
+}
+
+html[data-hub-theme='dark'] :is(
+  .hub-secondary-panel,
+  .hub-content-panel,
+  .hub-modal-panel,
+  .hub-dropdown-panel,
+  #portal,
+  #hub-zoom-portal,
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content']
+) :is(
+  .text-gray-400,
+  .text-slate-400,
+  .text-zinc-400,
+  .text-neutral-400
+):not(.hub-btn):not(.canvas-node *) {
+  color: var(--color-on-surface-muted, rgba(255, 255, 255, 0.40)) !important;
+}
+
+html[data-hub-theme='dark'] :is(
+  .hub-secondary-panel,
+  .hub-content-panel,
+  .hub-modal-panel,
+  .hub-dropdown-panel,
+  #portal,
+  #hub-zoom-portal,
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content']
+) :is(
+  .text-gray-300,
+  .text-slate-300,
+  .text-zinc-300,
+  .text-neutral-300
+):not(.hub-btn):not(.canvas-node *) {
+  color: rgba(255, 255, 255, 0.38) !important;
+}
+
+/* RadioGroupItem & Checkbox 暗色边框清晰度优化 */
+html[data-hub-theme='dark'] :is([data-slot='radio-group-item'], [data-slot='checkbox']):not([data-state='checked']):not([aria-checked='true']) {
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  background-color: rgba(0, 0, 0, 0.24) !important;
+}
+
+/* 5. 存量直接使用 text-[var(--theme-primary)] 的元素在暗色下自动切换为提亮后的 --theme-primary-ink */
+html[data-hub-theme='dark'] .text-\[var\(--theme-primary\)\] {
+  color: var(--theme-primary-ink, var(--theme-primary-text)) !important;
+}
+
+/* 6. 存量硬编码浅色边框与 ring -> 极细微半透白描边，消除 ring-black 黑圈 */
+html[data-hub-theme='dark'] :is(
+  .hub-secondary-panel,
+  .hub-content-panel,
+  .hub-modal-panel,
+  .hub-dropdown-panel,
+  #portal,
+  #hub-zoom-portal,
+  [data-slot='dialog-content'],
+  [data-slot='sheet-content']
+) :is(
+  .border-gray-100,
+  .border-gray-100\/80,
+  .border-gray-200,
+  .border-gray-200\/80,
+  .border-gray-300,
+  .border-slate-100,
+  .border-slate-200,
+  .border-slate-300,
+  .border-zinc-100,
+  .border-zinc-200,
+  .border-zinc-300,
+  .border-black\/5,
+  .border-black\/10,
+  .border-black\/\[0\.06\],
+  .border-black\/\[0\.08\],
+  .border-\[\#E8EAF2\],
+  .border-\[\#F1F2F7\],
+  .border-\[\#d9e5ed\]
+):not(.canvas-node *) {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-hub-theme='dark'] :is(
+  .ring-black\/\[0\.06\],
+  .ring-black\/\[0\.08\],
+  .ring-black\/5,
+  .ring-black\/10,
+  .ring-gray-200,
+  .ring-slate-200
+):not(.canvas-node *) {
+  --tw-ring-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-hub-theme='dark'] :is(.divide-gray-100, .divide-gray-200, .divide-slate-100, .divide-slate-200, .divide-zinc-100, .divide-zinc-200) > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+/* Markdown & 骨架屏暗色适配 */
+html[data-hub-theme='dark'] .asset-md :not(pre) > code,
+html[data-hub-theme='dark'] .asset-md pre {
+  background: rgba(0, 0, 0, 0.32);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+html[data-hub-theme='dark'] .animate-shimmer,
+html[data-hub-theme='dark'] .animate-shimmer-list {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 30%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.05) 70%
+  );
+  background-size: 200% 100%;
+}
