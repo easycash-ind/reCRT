@@ -41,6 +41,32 @@ export interface AsciiArtSettings {
   tiltRandomness: number;
   /** 登录方式选中态点阵白底外围辉光强度（0 = 无辉光） */
   tabPillGlow: number;
+  /** 落樱风洞：微风吹拂与枝头摇曳强度（0 = 静止无风） */
+  windStrength: number;
+  /** 落樱风洞：飘落花瓣数量（默认 14 片，少而精） */
+  petalCount: number;
+  /** 落樱风洞：飘落花瓣尺寸倍率（默认 1.50 即 150%） */
+  petalSize: number;
+  /** 落樱风洞：花瓣剥离飘落密度与速度（向后兼容） */
+  petalFallDensity: number;
+  /** 落樱风洞：Voronoi 粘连花瓣簇呼吸解构张开幅度（0 = 紧密闭合） */
+  deconstructAmount: number;
+  /** 赛博枯荣：四季生命周期流转速度倍率（0 = 暂停定格在当前季节） */
+  vanitasCycleSpeed: number;
+  /** 赛博枯荣：物种锁定选择（0 = 三物种星尘自动轮回, 1 = 河津樱, 2 = 山杜鹃, 3 = 大紫杜鹃） */
+  vanitasSpeciesLock: number;
+  /** 赛博枯荣：秋冬熵增风化剥离与反重力星尘升腾强度 */
+  entropyIntensity: number;
+  /** 赛博枯荣：春季测地线生长前沿的生物电脉冲辉光 */
+  genesisGlow: number;
+  /** 植物生物电：伪彩光谱模式（0=红外热成像, 1=深海生物荧光, 2=原生大紫杜鹃, 3=单色示波器） */
+  bioSpectrum: number;
+  /** 植物生物电：测地线动作电位脉冲传导频率（0.2..2.5，默认 1.0） */
+  bioPulseSpeed: number;
+  /** 植物生物电：动作电位脉冲与突触放电强度（0.0..2.5，默认 1.2） */
+  bioPulseIntensity: number;
+  /** 植物生物电：热核与动作电位尾迹扩散范围（0.2..2.0，默认 1.0） */
+  bioThermalSpread: number;
 }
 
 export const DEFAULT_ASCII_ART_SETTINGS: AsciiArtSettings = {
@@ -62,10 +88,25 @@ export const DEFAULT_ASCII_ART_SETTINGS: AsciiArtSettings = {
   rotationSpeed: 1.0,
   tiltRandomness: 0.65,
   tabPillGlow: 0.9,
+  windStrength: 1.0,
+  petalCount: 10,
+  petalSize: 1.2,
+  petalFallDensity: 1.0,
+  deconstructAmount: 1.0,
+  vanitasCycleSpeed: 1.0,
+  vanitasSpeciesLock: 0,
+  entropyIntensity: 1.0,
+  genesisGlow: 1.0,
+  bioSpectrum: 2,
+  bioPulseSpeed: 1.0,
+  bioPulseIntensity: 1.2,
+  bioThermalSpread: 1.0,
 };
 
-const PRIMARY_STORAGE_KEY = "hub.login.ascii-art-settings.v9";
+const PRIMARY_STORAGE_KEY = "hub.login.ascii-art-settings.v11";
 const LEGACY_STORAGE_KEYS = [
+  "hub.login.ascii-art-settings.v10",
+  "hub.login.ascii-art-settings.v9",
   "hub.login.ascii-art-settings.v8",
   "hub.login.ascii-art-settings.v7",
   "hub.login.ascii-art-settings.v6",
@@ -151,9 +192,125 @@ interface SliderConfig {
   max: number;
   step: number;
   format?: (v: number) => string;
+  sakuraOnly?: boolean;
+  vanitasOnly?: boolean;
+  azaleaOnly?: boolean;
 }
 
+const BIO_SPECTRUM_PRESETS: readonly { id: number; label: string; badge: string }[] = [
+  { id: 0, label: "红外热成像", badge: "FLIR" },
+  { id: 1, label: "深海生物荧光", badge: "BIO" },
+  { id: 2, label: "原生大紫杜鹃", badge: "NAT" },
+  { id: 3, label: "单色示波器", badge: "P39" },
+];
+
 const SLIDER_CONFIGS: readonly SliderConfig[] = [
+  {
+    key: "bioPulseSpeed",
+    label: "生物电脉冲传导频率",
+    min: 0.2,
+    max: 2.5,
+    step: 0.05,
+    format: (v) => `${v.toFixed(2)}x`,
+    azaleaOnly: true,
+  },
+  {
+    key: "bioPulseIntensity",
+    label: "动作电位脉冲强度",
+    min: 0.0,
+    max: 2.5,
+    step: 0.05,
+    format: (v) => `${Math.round(v * 100)}%`,
+    azaleaOnly: true,
+  },
+  {
+    key: "bioThermalSpread",
+    label: "热核尾迹扩散半径",
+    min: 0.2,
+    max: 2.0,
+    step: 0.05,
+    format: (v) => `${Math.round(v * 100)}%`,
+    azaleaOnly: true,
+  },
+  {
+    key: "vanitasSpeciesLock",
+    label: "标本物种选择",
+    min: 0,
+    max: 3,
+    step: 1,
+    format: (v) =>
+      v === 1
+        ? "01 河津樱"
+        : v === 2
+          ? "02 山杜鹃"
+          : v === 3
+            ? "03 大紫杜鹃"
+            : "自动星尘轮回",
+    vanitasOnly: true,
+  },
+  {
+    key: "vanitasCycleSpeed",
+    label: "枯荣四季轮回速度",
+    min: 0.0,
+    max: 2.5,
+    step: 0.05,
+    format: (v) => (v === 0 ? "定格" : `${v.toFixed(2)}x`),
+    vanitasOnly: true,
+  },
+  {
+    key: "entropyIntensity",
+    label: "秋冬熵增风化升腾度",
+    min: 0.2,
+    max: 2.5,
+    step: 0.05,
+    format: (v) => `${Math.round(v * 100)}%`,
+    vanitasOnly: true,
+  },
+  {
+    key: "genesisGlow",
+    label: "春季创生生物电脉冲",
+    min: 0.0,
+    max: 2.5,
+    step: 0.05,
+    format: (v) => `${Math.round(v * 100)}%`,
+    vanitasOnly: true,
+  },
+  {
+    key: "windStrength",
+    label: "微风吹拂弹性强度",
+    min: 0.0,
+    max: 2.5,
+    step: 0.05,
+    format: (v) => (v === 0 ? "静止" : `${Math.round(v * 100)}%`),
+    sakuraOnly: true,
+  },
+  {
+    key: "petalCount",
+    label: "飘落花瓣数量",
+    min: 0,
+    max: 36,
+    step: 1,
+    format: (v) => (v === 0 ? "无落樱" : `${Math.round(v)} 片`),
+    sakuraOnly: true,
+  },
+  {
+    key: "petalSize",
+    label: "飘落花瓣尺寸",
+    min: 0.5,
+    max: 3.0,
+    step: 0.05,
+    format: (v) => `${Math.round(v * 100)}%`,
+    sakuraOnly: true,
+  },
+  {
+    key: "deconstructAmount",
+    label: "花瓣簇呼吸解构度",
+    min: 0.0,
+    max: 2.5,
+    step: 0.05,
+    format: (v) => (v === 0 ? "原貌" : `${Math.round(v * 100)}%`),
+    sakuraOnly: true,
+  },
   {
     key: "glowIntensity",
     label: "字符辉光强度",
@@ -304,12 +461,14 @@ interface AsciiArtSettingsPanelProps {
   settings: AsciiArtSettings;
   onChange: (next: AsciiArtSettings) => void;
   onReset: () => void;
+  mode?: "azalea" | "vanitas" | "sakura" | "currency";
 }
 
 export function AsciiArtSettingsPanel({
   settings,
   onChange,
   onReset,
+  mode = "currency",
 }: AsciiArtSettingsPanelProps) {
   const [open, setOpen] = useState(false);
   const [nearCorner, setNearCorner] = useState(false);
@@ -461,7 +620,44 @@ export function AsciiArtSettingsPanel({
 
           {/* 滑块列表 */}
           <div className="flex flex-col gap-3 overflow-y-auto px-4 py-3.5">
-            {SLIDER_CONFIGS.map((cfg) => {
+            {mode === "azalea" && (
+              <div className="flex flex-col gap-1.5 border-b border-white/10 pb-2.5">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="text-white/75">伪彩光谱预设 (Spectrum)</span>
+                  <span className="font-mono text-emerald-400">
+                    {BIO_SPECTRUM_PRESETS[Math.round(settings.bioSpectrum ?? 0)]?.badge ?? "FLIR"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {BIO_SPECTRUM_PRESETS.map((preset) => {
+                    const active = Math.round(settings.bioSpectrum ?? 0) === preset.id;
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => handleValueChange("bioSpectrum", preset.id)}
+                        className={`flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition-all cursor-pointer ${
+                          active
+                            ? "bg-emerald-500/25 text-emerald-300 ring-1 ring-emerald-400/50"
+                            : "bg-white/5 text-white/65 hover:bg-white/10 hover:text-white"
+                        }`}
+                      >
+                        <span>{preset.label}</span>
+                        <span className="font-mono text-[10px] opacity-75">
+                          {preset.badge}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {SLIDER_CONFIGS.filter((cfg) => {
+              if (cfg.azaleaOnly) return mode === "azalea";
+              if (cfg.vanitasOnly) return mode === "vanitas";
+              if (cfg.sakuraOnly) return mode === "sakura" || mode === "vanitas";
+              return true;
+            }).map((cfg) => {
               const val = settings[cfg.key];
               const displayVal = cfg.format ? cfg.format(val) : String(val);
               return (

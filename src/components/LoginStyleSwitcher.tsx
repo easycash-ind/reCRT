@@ -1,7 +1,14 @@
 import type { ReactNode } from "react";
-import { Crosshair, Terminal } from "lucide-react";
+import { Activity, Car, Crosshair, Eye, Flower2, Sparkles, Terminal } from "lucide-react";
 
-export type LoginStyleVariant = "v4" | "ascii";
+export type LoginStyleVariant =
+  | "citypop"
+  | "iris"
+  | "azalea"
+  | "vanitas"
+  | "sakura"
+  | "ascii"
+  | "v4";
 
 export interface LoginStyleOption {
   id: LoginStyleVariant;
@@ -13,37 +20,82 @@ export interface LoginStyleOption {
 
 export const LOGIN_STYLE_OPTIONS: readonly LoginStyleOption[] = [
   {
+    id: "citypop",
+    label: "City Pop · 海岸巡航",
+    shortLabel: "CityPop",
+    desc: "80年代日系 City Pop 海滨双行道公路、DeLorean DMC-12 双视角自动驾驶与程序化随机海岸线",
+    icon: (size = 13) => <Car size={size} />,
+  },
+  {
+    id: "iris",
+    label: "全息图谱 · 蝴蝶花",
+    shortLabel: "蝴蝶花",
+    desc: "蝴蝶花薄膜光学干涉、参数化等高流线、科研解剖图谱与嵌入式文本终端登录",
+    icon: (size = 13) => <Eye size={size} />,
+  },
+  {
+    id: "azalea",
+    label: "生物电 · 热成像",
+    shortLabel: "生物电",
+    desc: "大紫杜鹃测地线生物电脉冲、四阶伪彩光谱与拟物硬件登录器",
+    icon: (size = 13) => <Activity size={size} />,
+  },
+  {
+    id: "vanitas",
+    label: "ASCII 枯荣",
+    shortLabel: "枯荣",
+    desc: "数字永生与熵增：多物种星尘凝聚、绽放与风化消散轮回",
+    icon: (size = 13) => <Sparkles size={size} />,
+  },
+  {
+    id: "sakura",
+    label: "ASCII 落樱",
+    shortLabel: "落樱",
+    desc: "河津樱扫描解构、数字风洞与拟物硬件登录器",
+    icon: (size = 13) => <Flower2 size={size} />,
+  },
+  {
+    id: "ascii",
+    label: "ASCII 货币",
+    shortLabel: "货币",
+    desc: "3D 货币符号 ASCII 矩阵与拟物硬件登录器",
+    icon: (size = 13) => <Terminal size={size} />,
+  },
+  {
     id: "v4",
     label: "流星头盔 HUD (V4)",
     shortLabel: "HUD V4",
     desc: "第一人称宇航员头盔 HUD 与破空流星视差",
     icon: (size = 13) => <Crosshair size={size} />,
   },
-  {
-    id: "ascii",
-    label: "ASCII 拟物风",
-    shortLabel: "ASCII",
-    desc: "3D 货币符号 ASCII 矩阵与拟物硬件登录器",
-    icon: (size = 13) => <Terminal size={size} />,
-  },
 ];
 
-const STORAGE_KEY = "hub.login.style-variant";
+const STORAGE_KEY = "hub.login.style-variant.v6";
 
 function normalizeVariant(value: string | null): LoginStyleVariant {
-  if (value === "v4" || value === "ascii") return value;
-  return "v4";
+  if (
+    value === "citypop" ||
+    value === "iris" ||
+    value === "azalea" ||
+    value === "vanitas" ||
+    value === "sakura" ||
+    value === "ascii" ||
+    value === "v4"
+  ) {
+    return value;
+  }
+  return "citypop";
 }
 
 export function loadLoginStyleVariant(): LoginStyleVariant {
-  if (typeof window === "undefined") return "v4";
+  if (typeof window === "undefined") return "citypop";
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
     return normalizeVariant(saved);
   } catch {
     // ignore
   }
-  return "v4";
+  return "citypop";
 }
 
 export function saveLoginStyleVariant(variant: LoginStyleVariant): void {

@@ -7,6 +7,13 @@ import {
   useHubThemeStore,
 } from "../stores/useHubThemeStore";
 import { CurrencyAsciiHeroCanvas } from "./CurrencyAsciiHeroCanvas";
+import { SakuraAsciiHeroCanvas } from "./SakuraAsciiHeroCanvas";
+import { AzaleaBioHeroCanvas } from "./AzaleaBioHeroCanvas";
+import {
+  VanitasAsciiHeroCanvas,
+  VANITAS_SPECIMENS,
+  type VanitasTelemetry,
+} from "./VanitasAsciiHeroCanvas";
 import {
   AsciiArtSettingsPanel,
   DEFAULT_ASCII_ART_SETTINGS,
@@ -17,6 +24,8 @@ import {
 } from "./AsciiArtSettingsPanel";
 import { TactileLoginConsole, type LoginMethod } from "./TactileLoginConsole";
 import { LoginV4 } from "./LoginV4";
+import { LoginIrisPage } from "./LoginIrisPage";
+import { LoginCityPopPage } from "./LoginCityPopPage";
 import {
   LoginStyleSwitcher,
   loadLoginStyleVariant,
@@ -26,9 +35,13 @@ import {
 import { useRememberedCredentials } from "../lib/loginCredentials";
 
 /**
- * 默认版本：3D 货币符号 ASCII 矩阵 + 拟物化硬件登录控制台
+ * ASCII 矩阵 + 拟物化硬件登录控制台（支持「赛博枯荣循环」、「落樱解构·数字风洞」与「3D 五常货币符号」三模式）
  */
-export function AsciiTactileLoginView() {
+export function AsciiTactileLoginView({
+  mode = "azalea",
+}: {
+  mode?: "azalea" | "vanitas" | "sakura" | "currency";
+}) {
   const {
     email,
     setEmail,
@@ -51,6 +64,11 @@ export function AsciiTactileLoginView() {
   const [asciiSettings, setAsciiSettings] = useState<AsciiArtSettings>(() =>
     loadAsciiArtSettings()
   );
+  const [vanitasTelemetry, setVanitasTelemetry] = useState<VanitasTelemetry>({
+    specimen: VANITAS_SPECIMENS[0],
+    phaseLabel: "II. FLOURISH [夏·盛放沐光]",
+    cycleProgress: 0.25,
+  });
 
   const handleSettingsChange = useCallback((next: AsciiArtSettings) => {
     setAsciiSettings(next);
@@ -172,21 +190,40 @@ export function AsciiTactileLoginView() {
         settings={asciiSettings}
         onChange={handleSettingsChange}
         onReset={handleSettingsReset}
+        mode={mode}
       />
 
-      {/* 全屏曜石黑底板 + 左侧五常货币符号 3D ASCII 艺术动画主舞台 */}
+      {/* 全屏曜石黑底板 + 左侧 3D ASCII 艺术动画主舞台 */}
       <div
         className={`absolute inset-0 transition-opacity duration-700 ease-out ${
           sceneReady ? "opacity-100" : "opacity-0"
         }`}
       >
-        <CurrencyAsciiHeroCanvas
-          onReady={handleSceneReady}
-          settings={asciiSettings}
-        />
+        {mode === "azalea" ? (
+          <AzaleaBioHeroCanvas
+            onReady={handleSceneReady}
+            settings={asciiSettings}
+          />
+        ) : mode === "vanitas" ? (
+          <VanitasAsciiHeroCanvas
+            onReady={handleSceneReady}
+            settings={asciiSettings}
+            onTelemetryChange={setVanitasTelemetry}
+          />
+        ) : mode === "sakura" ? (
+          <SakuraAsciiHeroCanvas
+            onReady={handleSceneReady}
+            settings={asciiSettings}
+          />
+        ) : (
+          <CurrencyAsciiHeroCanvas
+            onReady={handleSceneReady}
+            settings={asciiSettings}
+          />
+        )}
       </div>
 
-      {/* 前景双栏布局：左侧留白给五常货币符号 ASCII 主视觉，右侧垂直居中放置黑曜石毛玻璃登录组件 */}
+      {/* 前景双栏布局：左侧留白给 ASCII 主视觉，右侧垂直居中放置黑曜石毛玻璃登录组件 */}
       <div
         className={`relative z-10 mx-auto flex h-full w-full max-w-[1600px] flex-col items-center justify-end px-5 pb-[5vh] lg:flex-row lg:items-center lg:justify-between lg:pl-12 lg:pr-6 lg:pb-0 xl:max-w-[1760px] xl:pl-16 xl:pr-8 2xl:pr-12 transition-all duration-700 ease-out ${
           sceneReady
@@ -200,8 +237,22 @@ export function AsciiTactileLoginView() {
           className="pointer-events-none hidden h-full flex-1 lg:flex lg:flex-col lg:justify-end lg:pb-10"
         >
           <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[12px] tracking-[0.18em] text-white/28">
-            {/* 世界 Top20 经济体代表性货币符号 */}
-            <span>$ € £ ¥ ₹ ₽ ₩ ₺ ₴ ₱ ฿ ₪ ₫ ₦ ₸ ₡ ₮ ₲ ₵ ₿</span>
+            {mode === "azalea" ? (
+              <span>
+                SPECIMEN // RHODODENDRON × PULCHRUM · 大紫杜鹃 · BIO-THERMAL PULSE
+              </span>
+            ) : mode === "vanitas" ? (
+              <span>
+                {`VANITAS // [${vanitasTelemetry.specimen.code}] ${vanitasTelemetry.specimen.latinName} · ${vanitasTelemetry.specimen.jpName} · ${vanitasTelemetry.phaseLabel}`}
+              </span>
+            ) : mode === "sakura" ? (
+              <span>
+                SPECIMEN // PRUNUS LANNESIANA · 河津桜 · KAWAZU-ZAKURA · ❀ ✿ ❁ ✾ ✦
+              </span>
+            ) : (
+              /* 世界 Top20 经济体代表性货币符号 */
+              <span>$ € £ ¥ ₹ ₽ ₩ ₺ ₴ ₱ ฿ ₪ ₫ ₦ ₸ ₡ ₮ ₲ ₵ ₿</span>
+            )}
           </div>
         </div>
 
@@ -270,8 +321,13 @@ export function Login() {
       />
 
       {/* 根据切换栏选中的版本渲染对应页面 */}
+      {variant === "citypop" && <LoginCityPopPage />}
+      {variant === "iris" && <LoginIrisPage />}
       {variant === "v4" && <LoginV4 />}
-      {variant === "ascii" && <AsciiTactileLoginView />}
+      {variant === "azalea" && <AsciiTactileLoginView mode="azalea" />}
+      {variant === "vanitas" && <AsciiTactileLoginView mode="vanitas" />}
+      {variant === "sakura" && <AsciiTactileLoginView mode="sakura" />}
+      {variant === "ascii" && <AsciiTactileLoginView mode="currency" />}
     </>
   );
 }
